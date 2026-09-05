@@ -1,0 +1,27 @@
+clockspeed 20
+buffer 1
+save on
+buffer 0
+save off
+
+
+dest read
+poll cfill
+leb 95
+jmpif full
+poll cfill
+geb 90
+jmpif fill
+jmp read
+
+
+dest fill
+load on
+send 67
+jmp read
+
+
+dest full
+load off
+send 67
+jmp read

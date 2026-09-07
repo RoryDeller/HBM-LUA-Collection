@@ -1,0 +1,31 @@
+
+buffer 1
+save eject
+buffer 0
+save pause
+
+dest read
+listen prods
+save c1
+listen urods
+save c2 
+listen trods
+save c3
+jmp tally
+
+dest tally
+concat $c1$+$c2$+$c3$
+eval 
+ltb 11
+jmpif pushing
+jmpnot else
+
+dest pushing
+load eject
+send push
+jmp read
+
+dest else
+load pause
+send push
+jmp read

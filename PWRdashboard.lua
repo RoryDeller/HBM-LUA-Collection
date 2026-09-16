@@ -38,6 +38,6 @@ function getReactionInput(Y, D) --Placeholder for parabola involved in collision
 end
 
 while true
-    snapshot = fluxDecay(getFuelData())
-    totalFlux = totalFlux - snapshot
+    local snapshot = fluxDecay(getFuelData())
+    local newFlux = totalFlux - snapshot
 end

@@ -6,6 +6,10 @@ local Pgauge = component.ntm_power_gauge
 local Sgauge = component.ntm_fluid_gauge
 local PWR = component.ntm_pwr_control 
 local flux
+local Y
+local X
+local TU
+local totalFuel
 
 function getFuelData() -- 3 indexes 1: Fuel count, 2: Fuel depletion, 3: Max Depletion
     local fuelTable = {PWR.getFuelInfo()}
@@ -29,14 +33,33 @@ end
 
 while true do
     flux = PWR.getFlux() 
-    local TU = flux * 7.5
+    TU = flux * 7.5
     local fuelInfo = getFuelData()
     local snapshot, depletion = fluxDecay(getFuelData())
-    local totalFuel = fuelInfo[1] - (depletion / 100)
-    local Y = flux - snapshot
-    local X = getReactionInput(Y) 
+    totalFuel = fuelInfo[1] - (depletion / 100)
+    Y = flux - snapshot
+    X = getReactionInput(Y) 
     print("Current flux redacted " .. math.floor(snapshot) .. "     At " .. math.floor(depletion) .. "%" .. "     Totalling fuel at " .. totalFuel)
     print(" Rods Remaining: " .. fuelInfo[1] .. "     Dial flux: " .. math.floor(flux) .. "     Actual flux: " .. math.floor(Y))
     print(" Input flux during reactivity " .. X)
     os.sleep(15)
+end
+
+
+function drawYX() 
+
+end
+
+
+function drawOutput() --y height for both pages from 1-30 px
+
+end
+
+
+function drawDials() -- y height 30-40 px
+
+end
+
+function drawControl() -- y height 40-50 px, with touch screen buttons
+
 end

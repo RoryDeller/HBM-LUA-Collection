@@ -8,8 +8,8 @@ local Sgauge = component.ntm_fluid_gauge
 local PWR = component.ntm_pwr_control 
 local Y, X, TU, totalFuel
 local W, H = gpu.getResolution() 
-local xMin, xMax = 1, 150        --Graph bounds   
-local yMin, yMax = 30, 1
+local xMin, xMax = 1, 130        --Graph bounds  
+local yMin, yMax = 1, 30
 local topX, topY = 0, 0
 
 
@@ -38,16 +38,18 @@ end
 
 function getYFlux()
     flux = PWR.getFlux() 
-return flux
+    return flux
+end
 
-
-function drawGraph(maxX, maxY) 
+function drawGraph(maxX, maxY)
     gpu.setForeground(0xFFFFFF)
-    gpu.fill(xMin+1,yMin-1,xMin+1,yMax+1,"|")
-    gpu.fill(yMin-1,xMin+1,xMax-1,yMin-1, "_") --Draw graph axis with a pixel space for marking 0,0, 0,Max and Max,0
-    gpu.fill(xMin,yMin, "0")
-    gpu.fill(xMin,yMax, string.char(math.floor(maxX)))
-    gpu.fill(yMin,xMax, string.char(math.floor(maxY)))
+    gpu.fill(1,1,W,H," ") --clear screen
+    gpu.fill(xMin+5,yMin,1,yMax,"|")
+    gpu.fill(xMin+5,yMax,xMax,1, "_") --Draw graph axis 
+    gpu.fill(xMin,yMax,1,1,"0")
+    gpu.set(xMax+2,31,tostring(math.floor(maxX)))
+    gpu.set(xMax+2,1,tostring(math.floor(maxY)))
+    gpu.fill(1,35,160,1,"=")
 end
 
 
@@ -70,7 +72,7 @@ end
 
 
 function drawOutput() 
-    totalFuel = fuelInfo[1] - (depletion / 100)
+    --totalFuel = fuelInfo[1] - (depletion / 100)
 end
 
 function drawDials() -- y height 30-40 px
@@ -80,15 +82,11 @@ function drawControl() -- y height 40-50 px, with touch screen buttons
 end
 
 while true do
-    TU = getYFlux() * 7.5
-    local fuelInfo = getFuelData()
-    totalFuel = fuelInfo[1] - (depletion / 100)
+    --TU = getYFlux() * 7.5
+    --local fuelInfo = getFuelData()
+    --totalFuel = fuelInfo[1] - (depletion / 100)
 end
-
-
-function drawYX() 
-
-end
+ drawGraph(8000,90000)
 
 
 function drawOutput() --y height for both pages from 1-30 px

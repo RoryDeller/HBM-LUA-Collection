@@ -11,6 +11,10 @@ local W, H = gpu.getResolution()
 local xMin, xMax = 1, 130        --Graph bounds  
 local yMin, yMax = 1, 30
 local topX, topY = 0, 0
+local historyL = 1000
+local history = {}
+
+gpu.fill(1,1,W,H," ") --clear screen
 
 
 function getFuelData() 
@@ -41,14 +45,23 @@ function getYFlux()
     return flux
 end
 
+
+function recordPlot(x,y)
+    table.insert(history, {x = x, y = y})
+    if #history > historyL then
+        table.remove(history, 1)
+    end
+end
+
+
 function drawGraph(maxX, maxY)
     gpu.setForeground(0xFFFFFF)
-    gpu.fill(1,1,W,H," ") --clear screen
+    gpu.fill(xMin+5,yMin,xMax,yMax+1," ") --reset graph area
     gpu.fill(xMin+5,yMin,1,yMax,"|")
     gpu.fill(xMin+5,yMax,xMax,1, "_") --Draw graph axis 
     gpu.fill(xMin,yMax,1,1,"0")
-    gpu.set(xMax+2,31,tostring(math.floor(maxX)))
-    gpu.set(xMax+2,1,tostring(math.floor(maxY)))
+    gpu.set(xMax+5,31,tostring(math.floor(maxX)))
+    gpu.set(xMax+5,1,tostring(math.floor(maxY)))
     gpu.fill(1,35,160,1,"=")
 end
 
@@ -57,6 +70,7 @@ function drawXY()
     local snapshot, _ = fluxDecay(getFuelData())
     Y = getYFlux() - snapshot
     X = getReactionInputX(Y) 
+    recordPlot(X,Y)
     if X > topX then
         topX = X
     end
@@ -64,13 +78,19 @@ function drawXY()
         topY = Y
     end
     drawGraph(topX, topY)
-    gpu.setForeground(0x000066)
-    local Xplot = math.floor(X/topX) * xMax  --percentage ratio according to graph bounds
-    local Yplot = math.floor(Y/topY) * yMin
-    gpu.fill(Xplot, Yplot, 1, 1, "*")
-end
+    gpu.setForeground(0x00FF00)
+    for i, point in ipairs(history) do
+        local Xplot = xMin+6+(point.x/topX * xMax) --percentage ratio according to graph bounds
+        local Yplot = 1+yMax-(point.y/topY * yMax-1)
+        gpu.fill(Xplot, Yplot, 1, 1, "*")
+        
+    end
+end    
 
- drawXY()
+while true do 
+    drawXY()
+    os.sleep(0.5)
+end
 
 function drawOutput() 
     --totalFuel = fuelInfo[1] - (depletion / 100)
@@ -82,23 +102,3 @@ end
 function drawControl() -- y height 40-50 px, with touch screen buttons
 end
 
-while true do
-    --TU = getYFlux() * 7.5
-    --local fuelInfo = getFuelData()
-    --totalFuel = fuelInfo[1] - (depletion / 100)
-end
-
-
-
-function drawOutput() --y height for both pages from 1-30 px
-
-end
-
-
-function drawDials() -- y height 30-40 px
-
-end
-
-function drawControl() -- y height 40-50 px, with touch screen buttons
-
-end

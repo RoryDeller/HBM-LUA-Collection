@@ -67,9 +67,10 @@ function drawXY()
     gpu.setForeground(0x000066)
     local Xplot = math.floor(X/topX) * xMax  --percentage ratio according to graph bounds
     local Yplot = math.floor(Y/topY) * yMin
-    gpu.fill(Xplot, Yplot, "*")
+    gpu.fill(Xplot, Yplot, 1, 1, "*")
 end
 
+ drawXY()
 
 function drawOutput() 
     --totalFuel = fuelInfo[1] - (depletion / 100)
@@ -86,7 +87,7 @@ while true do
     --local fuelInfo = getFuelData()
     --totalFuel = fuelInfo[1] - (depletion / 100)
 end
- drawGraph(8000,90000)
+
 
 
 function drawOutput() --y height for both pages from 1-30 px

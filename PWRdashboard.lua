@@ -6,13 +6,13 @@ local gpu = component.gpu
 local Pgauge = component.ntm_power_gauge
 local Sgauge = component.ntm_fluid_gauge
 local PWR = component.ntm_pwr_control 
-local Y, X, TU, totalFuel
+local Y, X, TU
 local W, H = gpu.getResolution() 
 local xMin, xMax = 1, 130        --Graph bounds  
 local yMin, yMax = 1, 30
-local topX, topY = 0, 0
+local topX, topY, topX2, topY2 = 0, 0, 0, 0
 local historyL = 1000
-local history = {}
+local history, history2 = {}, {}
 
 gpu.fill(1,1,W,H," ") --clear screen
 
@@ -34,7 +34,7 @@ function fluxDecay(fuelData)
 end
 
 
-function getReactionInputX(Y) --Parabola input in collisions
+function getReactionInputX(Y) 
     local x = (1/625)*Y^2
     return x
 end
@@ -46,7 +46,7 @@ function getYFlux()
 end
 
 
-function recordPlot(x,y)
+function recordPlot(x,y,history)
     table.insert(history, {x = x, y = y})
     if #history > historyL then
         table.remove(history, 1)
@@ -62,15 +62,16 @@ function drawGraph(maxX, maxY)
     gpu.fill(xMin,yMax,1,1,"0")
     gpu.set(xMax+5,31,tostring(math.floor(maxX)))
     gpu.set(xMax+5,1,tostring(math.floor(maxY)))
-    gpu.fill(1,35,160,1,"=")
+    gpu.fill(1,33,160,1,"=")
 end
 
 
 function drawXY()
+    gpu.setActiveBuffer(1)
     local snapshot, _ = fluxDecay(getFuelData())
     Y = getYFlux() - snapshot
     X = getReactionInputX(Y) 
-    recordPlot(X,Y)
+    recordPlot(X,Y,history)
     if X > topX then
         topX = X
     end
@@ -83,22 +84,41 @@ function drawXY()
         local Xplot = xMin+6+(point.x/topX * xMax) --percentage ratio according to graph bounds
         local Yplot = 1+yMax-(point.y/topY * yMax-1)
         gpu.fill(Xplot, Yplot, 1, 1, "*")
-        
     end
 end    
 
-while true do 
-    drawXY()
-    os.sleep(0.5)
-end
 
-function drawOutput() 
-    --totalFuel = fuelInfo[1] - (depletion / 100)
+function drawOutput()
+    gpu.setActiveBuffer(2)
+    --gpu.allocateBuffer(xMax, yMax)
+    gpu.setForeground(0x33FFFF)
+    local snapshot, depletion = fluxDecay(getFuelData())
+    Y = getYFlux() - snapshot
+    X = fuelInfo[1]
+    local totalFuel = fuelInfo[1] - (depletion / 100) --Revert percentage, and calculate true health for fuel remaining
+    recordPlot(totalFuel,Y,history2)
+    if X > topX2 then
+        topX2 = X
+    end
+    if Y > topY2 then
+        topY2 = Y
+    end
+    drawGraph(topX2, topY2)
+    gpu.setForeground(0x00FF00)
+    for i, point in ipairs(history2) do
+        local Xplot = xMin+6+(point.x/topX2 * xMax) 
+        local Yplot = 1+yMax-(point.y/topY2 * yMax-1)
+        gpu.fill(Xplot, Yplot, 1, 1, "*")
+    end
 end
 
 function drawDials() -- y height 30-40 px
 end
 
-function drawControl() -- y height 40-50 px, with touch screen buttons
+function drawControl() -- y height 40-50 px, touch screen buttons
 end
 
+while true do 
+    drawXY()
+    os.sleep(0.5)
+end
